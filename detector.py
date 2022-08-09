@@ -19,8 +19,8 @@ from openpyxl import Workbook
 from tqdm import tqdm
 # the dimension of the images can be ajusted here
 
-width = 1000
-height = 1028
+width = 800
+height = 600
 
 path_to_model = "efficientdet_lite2_detection_1"
 detector = tf.saved_model.load(path_to_model)  # load the saved model
@@ -43,8 +43,9 @@ for file in tqdm(filenames):
         img = cv2.imread(image)
         # Resize to respect the input_shape
         inp = cv2.resize(img, (width, height))
+        cropped = inp[150:600, 0:800]
         # Convert img to RGB
-        rgb = cv2.cvtColor(inp, cv2.COLOR_BGR2RGB)
+        rgb = cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB)
         img_boxes = rgb
         # COnverting to uint8
         rgb_tensor = tf.convert_to_tensor(rgb, dtype=tf.uint8)
@@ -67,7 +68,8 @@ for file in tqdm(filenames):
                 number_of_cars += 1 
         df.at[int(i), "number_cars"] = number_of_cars
         # displays the image and the bounding box briefly on the screen 
-        cv2.imshow("title", img_boxes)
+        cv2.imshow("resized", img_boxes)
+        cv2.imshow("original", inp)
         cv2.waitKey(1)
     finalexcelsheet = pd.concat([finalexcelsheet, df])
 finalexcelsheet.to_excel(r"merged.xlsx")
