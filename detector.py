@@ -18,23 +18,35 @@ from PIL import Image
 from openpyxl import Workbook
 from tqdm import tqdm
 # the dimension of the images can be ajusted here
-
+def convert_2_raw(input_string):
+    return r'{}'.format(input_string)
+def choose_image_field(df):
+    for i in range (0, len(df.columns)):
+        print(f"{str(i)} => {df.columns[i]}")
+    try: 
+        result = int(input("enter the columns number to select: ")) # TODO: check that input is an integer
+    except:
+        print("invalid input")
+        result = int(input("enter the columns number to select: ")) # TODO: check that input is an integer
+    return df.columns[result]
 width = 800
 height = 600
-
-path_to_model = "efficientdet_lite2_detection_1"
+#
+path_to_model = os.path.join("efficientdet_lite2_detection_1")
 detector = tf.saved_model.load(path_to_model)  # load the saved model
 # setup csv fields
-data_root_folder = r"/media/throgg/KINGSTON/Output/" # root folder containing all data 
+# r"/media/throgg/KINGSTON/Output/"
+print ("enter the directory containing the vt files and images")
+print ("here is an input example on linux : /media/throgg/KINGSTON/Output/")
+data_root_folder =  convert_2_raw(input("enter the directory containing vt files: "))# root folder containing all data 
 # fuse all the csv in a folder
-csv_name = "LM003_CL1_vt.csv"
-
-
 filenames = glob.glob(data_root_folder + "*.csv")
 finalexcelsheet = pd.DataFrame()
+path_field = ""
 for file in tqdm(filenames):
     df= pd.read_csv(file)
-    path_field = "image1" # add a gui element 
+    if path_field == "": # the user only has to be asked about the path field if the program doesn't know it
+        path_field = choose_image_field(df)
     df["car_in_pic"] = "no"  # create new field, default value is no 
     df["number_cars"] = 0
     for i in tqdm(df.index):
@@ -72,7 +84,7 @@ for file in tqdm(filenames):
         cv2.imshow("original", inp)
         cv2.waitKey(1)
     finalexcelsheet = pd.concat([finalexcelsheet, df])
-finalexcelsheet.to_excel(r"merged.xlsx")
+finalexcelsheet.to_excel(os.path.join("output.xlsx"))
 
 
 
